@@ -11,9 +11,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Decode source archive
-        run: base64 -d sop-controlled-evolution.zip.b64 > sop-controlled-evolution.zip
-      - name: Extract source
+      - name: Extract source archive
         run: unzip -q sop-controlled-evolution.zip -d bundle
       - name: Build trusted sandbox image
         run: docker build -t sop-agent-sandbox:ci -f bundle/sop-controlled-evolution/package/sandbox/Dockerfile bundle/sop-controlled-evolution/package/sandbox
