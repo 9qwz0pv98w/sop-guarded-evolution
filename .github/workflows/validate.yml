@@ -1,0 +1,25 @@
+name: Validate isolated agent runtime
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode source archive
+        run: base64 -d sop-controlled-evolution.zip.b64 > sop-controlled-evolution.zip
+      - name: Extract source
+        run: unzip -q sop-controlled-evolution.zip -d bundle
+      - name: Build trusted sandbox image
+        run: docker build -t sop-agent-sandbox:ci -f bundle/sop-controlled-evolution/package/sandbox/Dockerfile bundle/sop-controlled-evolution/package/sandbox
+      - name: Test guard, scoring, sandbox and promotion
+        env:
+          SOP_IMAGE: sop-agent-sandbox:ci
+          SOP_RUN_DOCKER_TESTS: "1"
+          PYTHONPATH: bundle/sop-controlled-evolution/package
+        run: python3 -m unittest discover -s bundle/sop-controlled-evolution/package/tests -v
